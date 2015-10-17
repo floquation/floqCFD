@@ -1,14 +1,14 @@
-import CFD.CFDMain;
-import CFD.CFDProber;
-import UI.GraphicsManager;
+import newCFD.CFDMain;
+import newCFD.CFDProber;
+import newUI.GraphicsManager;
 
 
-public class MainClass {
+public class newMainClass {
 		
 	public static void main(String[] args){
 		//Debug
 		CFD.DEBUG.DEBUG = true;
-		CFD.DEBUG.DEBUGlevel = 2;
+		CFD.DEBUG.DEBUGlevel = 3;
 		
 		//CFD
 		CFDMain cfd = new CFDMain();

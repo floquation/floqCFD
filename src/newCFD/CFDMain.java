@@ -1,4 +1,4 @@
-package CFD;
+package newCFD;
 
 /**
  * 
@@ -96,9 +96,9 @@ public class CFDMain{
 	}
 	
 	public void setNumInnerIter(int it_u, int it_v, int it_P){
-		data.numInnerIt_U = it_u;
-		data.numInnerIt_V = it_v;
-		data.numInnerIt_P = it_P;
+		data.numInnerIt_U = Math.max(1, it_u);
+		data.numInnerIt_V = Math.max(1, it_v);
+		data.numInnerIt_P = Math.max(1, it_P);
 	}
 	
 

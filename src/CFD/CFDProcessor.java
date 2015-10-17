@@ -225,7 +225,7 @@ public class CFDProcessor implements Runnable {
 		
 		//Global Mass Conservation
 			ensureGlobMassCons();
-			
+						
 		//Inner loop: P
 			//First update the coefficients: 			//TODO: outside loop
 			
@@ -255,12 +255,12 @@ public class CFDProcessor implements Runnable {
 						Pcorr_new[i][j] = ( -massflux-(aN*Pcorr_mid[i][j+1]+aS*Pcorr_mid[i][j-1]+aE*Pcorr_mid[i+1][j]+aW*Pcorr_mid[i-1][j]) )/aP;
 
 						if(DEBUG.DEBUG && DEBUG.DEBUGlevel>=3)
-							System.out.println("P: (i,j) [aN, aS, aW, aE; aP][Q] = (" + i + "," + j + ") [" + aN + "," + aS + "," + aW + "," + aE + "; "+ aP + "][" + massflux + "]; -> Pcorr_new = " + Pcorr_new[i][j]);
+							System.out.println("P: (i,j) [aP; aN, aS, aW, aE][Q] = (" + i + "," + j + ") [" + aP + ";" + aN + "," + aS + "," + aW + ", "+ aE + "][" + -massflux + "]; -> Pcorr_new = " + Pcorr_new[i][j]);
 					} //End j
 				} //End i
 
 				applyBC(3);	//p'
-				
+								
 				//Step 2: I need not do anything, because P_mid and P_new point to the same memory.		
 //				for(int i = 0; i<P_mid.length; i++){
 //					Pcorr_mid[i] = Pcorr_new[i].clone();
@@ -270,7 +270,8 @@ public class CFDProcessor implements Runnable {
 					for(int j = 0; j<Pcorr_new[i].length; j++){
 						Pcorr_mid[i][j] = Pcorr_new[i][j] - Pcorr_new[i_PRef][j_PRef];
 					}
-				}	
+				}
+				
 			} //End Inner Iteration for P
 						
 			//Correct the velocities:
