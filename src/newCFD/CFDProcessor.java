@@ -165,12 +165,12 @@ public class CFDProcessor implements Runnable {
 			//Correct the velocities:
 			for(int i = 1; i<data.u.length-1; i++){
 				for(int j = 1; j<data.u[i].length-1; j++){
-					u_mid[i][j] += -data.centerdy[j]/Au[i][j][0]*(Pcorr_mid[i+1][j]-Pcorr_mid[i][j]) * data.underRelax_U;
+					u_mid[i][j] += -data.meshStaggerU.cellHeight[j]/Au[i][j][0]*(Pcorr_mid[i+1][j]-Pcorr_mid[i][j]) * data.underRelax_U;
 				}
 			}
 			for(int i = 1; i<data.v.length-1; i++){
 				for(int j = 1; j<data.v[i].length-1; j++){
-					v_mid[i][j] += -data.centerdx[i]/Av[i][j][0]*(Pcorr_mid[i][j+1]-Pcorr_mid[i][j]) * data.underRelax_V;
+					v_mid[i][j] += -data.meshStaggerV.cellWidth[i]/Av[i][j][0]*(Pcorr_mid[i][j+1]-Pcorr_mid[i][j]) * data.underRelax_V;
 				}
 			}
 			
@@ -292,23 +292,23 @@ public class CFDProcessor implements Runnable {
 			for(int j = 1; j<data.u[i].length-1; j++){
 				
 				// EAST:
-				A[i][j][4] = Math.min(0, 0.5d * data.rho * data.centerdy[j] * (u_mid[i][j] + u_mid[i+1][j])); //Convection
-				A[i][j][4] += -2*data.mu*data.centerdy[j]/data.centerdx[i+1]; //Diffusion
+				A[i][j][4] = Math.min(0, 0.5d * data.rho * data.meshStaggerU.cellHeight[j] * (u_mid[i][j] + u_mid[i+1][j])); //Convection
+				A[i][j][4] += -2*data.mu*data.meshStaggerU.cellHeight[j]/data.meshStaggerU.cellHorDist[i+1]; //Diffusion
 				
 				// WEST:
-				A[i][j][3] = Math.min(0, -0.5d * data.rho * data.centerdy[j] * (u_mid[i][j] + u_mid[i-1][j])); //Convection
-				A[i][j][3] += -2*data.mu*data.centerdy[j]/data.centerdx[i]; //Diffusion
+				A[i][j][3] = Math.min(0, -0.5d * data.rho * data.meshStaggerU.cellHeight[j] * (u_mid[i][j] + u_mid[i-1][j])); //Convection
+				A[i][j][3] += -2*data.mu*data.meshStaggerU.cellHeight[j]/data.meshStaggerU.cellHorDist[i]; //Diffusion
 				
 				// NORTH:
-				A[i][j][1] = Math.min(0, 0.5d * data.rho * data.staggereddx[i] * (v_mid[i][j] + v_mid[i+1][j])); //Convection
-				A[i][j][1] += -data.mu*data.staggereddx[i]/data.staggereddy[j]; //Diffusion
+				A[i][j][1] = Math.min(0, 0.5d * data.rho * data.meshStaggerU.cellWidth[i] * (v_mid[i][j] + v_mid[i+1][j])); //Convection
+				A[i][j][1] += -data.mu*data.meshStaggerU.cellWidth[i]/data.meshStaggerU.cellVertDist[j]; //Diffusion
 				
 				// SOUTH:
-				A[i][j][2] = Math.min(0, -0.5d * data.rho * data.staggereddx[i] * (v_mid[i][j-1] + v_mid[i+1][j-1])); //Convection
-				A[i][j][2] += -data.mu*data.staggereddx[i]/data.staggereddy[j-1]; //Diffusion
+				A[i][j][2] = Math.min(0, -0.5d * data.rho * data.meshStaggerU.cellWidth[i] * (v_mid[i][j-1] + v_mid[i+1][j-1])); //Convection
+				A[i][j][2] += -data.mu*data.meshStaggerU.cellWidth[i]/data.meshStaggerU.cellVertDist[j-1]; //Diffusion
 				
 				// CENTER:
-				double at = data.rho*(data.centerdy[j]*data.staggereddx[i])/data.dt;				
+				double at = data.rho*(data.meshStaggerU.cellWidth[i]*data.meshStaggerU.cellHeight[j])/data.dt;				
 				A[i][j][0] = -(A[i][j][1] + A[i][j][2] + A[i][j][3] + A[i][j][4]) + at;
 			}
 		}
@@ -325,9 +325,9 @@ public class CFDProcessor implements Runnable {
 		for(int i = 1; i<data.u.length-1; i++){
 			for(int j = 1; j<data.u[i].length-1; j++){
 
-				double at = data.rho*(data.centerdy[j]*data.staggereddx[i])/data.dt;	
+				double at = data.rho*(data.meshStaggerU.cellHeight[j]*data.meshStaggerU.cellWidth[i])/data.dt;	
 				double Qt = at * data.u[i][j];
-				double Qp = -(P_mid[i+1][j]-P_mid[i][j])*data.centerdy[j];
+				double Qp = -(P_mid[i+1][j]-P_mid[i][j])*data.meshStaggerU.cellHeight[j];
 				double Qd = data.mu*(v_mid[i+1][j]-v_mid[i][j]) - data.mu*(v_mid[i+1][j-1]-v_mid[i][j-1]);
 				
 				Q[i][j] = Qt + Qp + Qd;
@@ -349,23 +349,23 @@ public class CFDProcessor implements Runnable {
 			for(int j = 1; j<data.v[i].length-1; j++){
 				
 				// EAST:
-				A[i][j][4] = Math.min(0, 0.5d * data.rho * data.staggereddy[j] * (u_mid[i][j] + u_mid[i][j+1])); //Convection
-				A[i][j][4] += -data.mu*data.staggereddy[j]/data.staggereddx[i]; //Diffusion
+				A[i][j][4] = Math.min(0, 0.5d * data.rho * data.meshStaggerV.cellHeight[j] * (u_mid[i][j] + u_mid[i][j+1])); //Convection
+				A[i][j][4] += -data.mu*data.meshStaggerV.cellHeight[j]/data.meshStaggerV.cellHorDist[i]; //Diffusion
 				
 				// WEST:
-				A[i][j][3] = Math.min(0, -0.5d * data.rho * data.staggereddy[j] * (u_mid[i-1][j] + u_mid[i-1][j+1])); //Convection
-				A[i][j][3] += -data.mu*data.staggereddy[j]/data.staggereddx[i-1]; //Diffusion
+				A[i][j][3] = Math.min(0, -0.5d * data.rho * data.meshStaggerV.cellHeight[j] * (u_mid[i-1][j] + u_mid[i-1][j+1])); //Convection
+				A[i][j][3] += -data.mu*data.meshStaggerV.cellHeight[j]/data.meshStaggerV.cellHorDist[i-1]; //Diffusion
 				
 				// NORTH:
-				A[i][j][1] = Math.min(0, 0.5d * data.rho * data.centerdx[i] * (v_mid[i][j] + v_mid[i][j+1])); //Convection
-				A[i][j][1] += -2*data.mu*data.centerdx[i]/data.centerdy[j+1]; //Diffusion
+				A[i][j][1] = Math.min(0, 0.5d * data.rho * data.meshStaggerV.cellWidth[i] * (v_mid[i][j] + v_mid[i][j+1])); //Convection
+				A[i][j][1] += -2*data.mu*data.meshStaggerV.cellWidth[i]/data.meshStaggerV.cellVertDist[j+1]; //Diffusion
 				
 				// SOUTH:
-				A[i][j][2] = Math.min(0, -0.5d * data.rho * data.centerdx[i] * (v_mid[i][j-1] + v_mid[i][j])); //Convection
-				A[i][j][2] += -2*data.mu*data.centerdx[i]/data.centerdy[j]; //Diffusion
+				A[i][j][2] = Math.min(0, -0.5d * data.rho * data.meshStaggerV.cellWidth[i] * (v_mid[i][j-1] + v_mid[i][j])); //Convection
+				A[i][j][2] += -2*data.mu*data.meshStaggerV.cellWidth[i]/data.meshStaggerV.cellVertDist[j]; //Diffusion
 				
 				// CENTER:
-				double at = data.rho*(data.centerdx[i]*data.staggereddy[j])/data.dt;				
+				double at = data.rho*(data.meshStaggerV.cellWidth[i]*data.meshStaggerV.cellHeight[j])/data.dt;				
 				A[i][j][0] = -(A[i][j][1] + A[i][j][2] + A[i][j][3] + A[i][j][4]) + at;
 			}
 		}
@@ -382,9 +382,9 @@ public class CFDProcessor implements Runnable {
 		for(int i = 1; i<data.v.length-1; i++){
 			for(int j = 1; j<data.v[i].length-1; j++){
 
-				double at = data.rho*(data.centerdx[i]*data.staggereddy[j])/data.dt;		
+				double at = data.rho*(data.meshStaggerV.cellWidth[i]*data.meshStaggerV.cellHeight[j])/data.dt;		
 				double Qt = at * data.v[i][j];
-				double Qp = -(P_mid[i][j+1]-P_mid[i][j])*data.centerdx[i];
+				double Qp = -(P_mid[i][j+1]-P_mid[i][j])*data.meshStaggerV.cellWidth[i];
 				double Qd = data.mu*(u_mid[i][j+1]-u_mid[i][j]) - data.mu*(u_mid[i-1][j+1]-u_mid[i-1][j]);
 				
 				Q[i][j] = Qt + Qp + Qd;
@@ -410,16 +410,16 @@ public class CFDProcessor implements Runnable {
 			for(int j = 1; j<data.P[i].length-1; j++){
 				
 				// EAST:
-				Ap[i][j][4] = -data.rho * data.centerdy[j] * data.centerdy[j] / Au[i][j][0];
+				Ap[i][j][4] = -data.rho * data.meshCenter.cellHeight[j] * data.meshCenter.cellHeight[j] / Au[i][j][0];
 				
 				// WEST:
-				Ap[i][j][3] = -data.rho * data.centerdy[j] * data.centerdy[j] / Au[i-1][j][0];
+				Ap[i][j][3] = -data.rho * data.meshCenter.cellHeight[j] * data.meshCenter.cellHeight[j] / Au[i-1][j][0];
 				
 				// NORTH:
-				Ap[i][j][1] = -data.rho * data.centerdx[i] * data.centerdx[i] / Av[i][j][0];
+				Ap[i][j][1] = -data.rho * data.meshCenter.cellWidth[i] * data.meshCenter.cellWidth[i] / Av[i][j][0];
 				
 				// SOUTH:
-				Ap[i][j][2] = -data.rho * data.centerdx[i] * data.centerdx[i] / Av[i][j-1][0];
+				Ap[i][j][2] = -data.rho * data.meshCenter.cellWidth[i] * data.meshCenter.cellWidth[i] / Av[i][j-1][0];
 				
 				// CENTER:
 				Ap[i][j][0] = -(Ap[i][j][1] + Ap[i][j][2] + Ap[i][j][3] + Ap[i][j][4]);
@@ -439,10 +439,10 @@ public class CFDProcessor implements Runnable {
 		for(int i = 1; i<data.P.length-1; i++){
 			for(int j = 1; j<data.P[i].length-1; j++){
 				double massflux =
-						+	data.rho * u_mid[i][j] * data.centerdy[j]
-						- 	data.rho * u_mid[i-1][j] * data.centerdy[j]
-						+	data.rho * v_mid[i][j] * data.centerdx[i]
-						-	data.rho * v_mid[i][j-1] * data.centerdx[i];
+						+	data.rho * u_mid[i][j] * data.meshCenter.cellHeight[j]
+						- 	data.rho * u_mid[i-1][j] * data.meshCenter.cellHeight[j]
+						+	data.rho * v_mid[i][j] * data.meshCenter.cellWidth[i]
+						-	data.rho * v_mid[i][j-1] * data.meshCenter.cellWidth[i];
 				
 				Q[i][j] = -massflux;
 			}
@@ -499,10 +499,10 @@ public class CFDProcessor implements Runnable {
 		double massflux_out = 0;
 		for(int j = 1; j<u_mid[0].length-1; j++){ //note: ghost cells (walls) not taken into account
 			//Inlet: WEST
-			massflux_in += data.rho*u_mid[0][j]*data.centerdy[j];
+			massflux_in += data.rho*u_mid[0][j]*data.meshCenter.cellHeight[j];
 			
 			//Outlet: EAST
-			massflux_out += data.rho*u_mid[u_mid.length-1][j]*data.centerdy[j];
+			massflux_out += data.rho*u_mid[u_mid.length-1][j]*data.meshCenter.cellHeight[j];
 		}
 		
 		//Correct mass conservation by changing the velocity at the outlet

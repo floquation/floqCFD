@@ -26,10 +26,10 @@ public class CFDProber {
 		for(int i = 1; i<m.length-1; i++){
 			for(int j = 1; j<m[i].length-1; j++){
 				m[i][j] = 
-						-	data.rho * data.u[i][j] * data.centerdy[j] 		//out
-						+ 	data.rho * data.u[i-1][j] * data.centerdy[j] 	//in
-						-	data.rho * data.v[i][j] * data.centerdx[i] 		//out
-						+	data.rho * data.v[i][j-1] * data.centerdx[i] 	//in
+						-	data.rho * data.u[i][j] * data.meshCenter.cellHeight[j] 		//out
+						+ 	data.rho * data.u[i-1][j] * data.meshCenter.cellHeight[j] 	//in
+						-	data.rho * data.v[i][j] * data.meshCenter.cellWidth[i] 		//out
+						+	data.rho * data.v[i][j-1] * data.meshCenter.cellWidth[i] 	//in
 						;
 				massCons += m[i][j];
 			}
@@ -42,17 +42,17 @@ public class CFDProber {
 	}
 	
 	public double[] getStaggeredMeshUX(){
-		return data.staggeredPointsUX;
+		return data.meshStaggerU.cellX;
 	}
 	public double[] getStaggeredMeshVY(){
-		return data.staggeredPointsVY;
+		return data.meshStaggerV.cellY;
 	}
 	
 	public double[] getCenterMeshX(){
-		return data.centerPointsX;
+		return data.meshCenter.cellX;
 	}
 	public double[] getCenterMeshY(){
-		return data.centerPointsY;
+		return data.meshCenter.cellY;
 	}
 	
 	

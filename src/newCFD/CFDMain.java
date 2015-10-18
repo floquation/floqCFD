@@ -26,6 +26,35 @@ public class CFDMain{
 			proc = new CFDProcessor(data, status);
 			return prober;
 		}else{
+			System.out.println("(CFDMain) CFD was not correctly initialized. The errors are:");
+			if (data.rho == 0)
+				System.out.println("(CFDMain) data.rho = " + data.rho);
+			if (data.dt == 0)
+				System.out.println("(CFDMain) data.dt = " + data.dt);
+			if (data.meshCenter.cellX == null)
+				System.out.println("(CFDMain) data.meshCenter.cellX == null!");
+			if (data.meshCenter.cellY == null)
+				System.out.println("(CFDMain) data.meshCenter.cellY == null!");
+			if (data.meshCenter.cellWidth == null)
+				System.out.println("(CFDMain) data.meshCenter.cellWidth == null!");
+			if (data.meshCenter.cellHeight == null)
+				System.out.println("(CFDMain) data.meshCenter.cellHeight == null!");
+			if (data.meshStaggerU.cellX == null)
+				System.out.println("(CFDMain) data.meshStaggerU.cellX == null!");
+			if (data.meshStaggerV.cellY == null)
+				System.out.println("(CFDMain) data.meshStaggerV.cellY == null!");
+			if (data.meshStaggerU.cellWidth == null)
+				System.out.println("(CFDMain) data.meshStaggerU.cellWidth == null!");
+			if (data.meshStaggerV.cellHeight == null)
+				System.out.println("(CFDMain) data.meshStaggerV.cellHeight == null!");
+			if (data.P == null)
+				System.out.println("(CFDMain) data.P == null!");
+			if (data.T == null)
+				System.out.println("(CFDMain) data.T == null!");
+			if (data.u == null)
+				System.out.println("(CFDMain) data.u == null!");
+			if (data.v == null)
+				System.out.println("(CFDMain) data.v == null!");
 			return null;
 		}
 	}
@@ -73,14 +102,14 @@ public class CFDMain{
 	private void checkWhetherInitialized(){
 		if (
 				data.rho != 0 && data.dt != 0 && data.maxIt != 0
-				&& data.centerPointsX != null && data.centerPointsY != null
-				&& data.staggeredPointsUX != null && data.staggeredPointsVY != null 
-				&& data.centerdx != null && data.centerdy != null
-				&& data.staggereddx != null && data.staggereddy != null 
+				&& data.meshCenter.cellX != null && data.meshCenter.cellY != null
+				&& data.meshCenter.cellWidth != null && data.meshCenter.cellHeight != null 
+				&& data.meshStaggerU.cellX != null && data.meshStaggerV.cellY != null
+				&& data.meshStaggerU.cellWidth != null && data.meshStaggerV.cellHeight != null 
 				&& data.P != null && data.T != null
 				&& data.u != null && data.v != null){
 			status.isInitialized = true;
-		}else{
+		}else{			
 			status.isInitialized = false;
 		}
 	}

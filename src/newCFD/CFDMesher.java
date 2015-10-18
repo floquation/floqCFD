@@ -20,14 +20,14 @@ public class CFDMesher {
 		data.v = new double[Nx][Ny-1];
 		data.P = new double[Nx][Ny];
 		data.T = new double[Nx][Ny];
-		data.centerPointsX = new double[Nx];
-		data.centerPointsY = new double[Ny];
-		data.staggeredPointsUX = new double[Nx-1];
-		data.staggeredPointsVY = new double[Ny-1];
-		data.centerdx = new double[Nx];
-		data.centerdy = new double[Ny];
-		data.staggereddx = new double[Nx-1];
-		data.staggereddy = new double[Ny-1];
+		double[] centerPointsX = new double[Nx];
+		double[] centerPointsY = new double[Ny];
+		double[] staggeredPointsUX = new double[Nx-1];
+		double[] staggeredPointsVY = new double[Ny-1];
+		double[] centerdx = new double[Nx];
+		double[] centerdy = new double[Ny];
+		double[] staggereddx = new double[Nx-1];
+		double[] staggereddy = new double[Ny-1];
 		
 		//Make an uniform mesh with rectangular elements
 		//We iterate over each cell, meaning there is 1 corner more than N for each dimension.
@@ -36,33 +36,42 @@ public class CFDMesher {
 		
 		lastY = (-1d)/(Ny-2);
 		for(int j = 0; j<Ny; j++){
-			data.centerdy[j] = 1d/(Ny-2);
-			data.centerPointsY[j] = lastY + 0.5d * data.centerdy[j];
+			centerdy[j] = 1d/(Ny-2);
+			centerPointsY[j] = lastY + 0.5d * centerdy[j];
 			
 			//Staggered grid:
 			if(j<Ny-1){
-				data.staggereddy[j] = 1d/(Ny-2);
-				data.staggeredPointsVY[j] = lastY + data.centerdy[j];
+				staggereddy[j] = 1d/(Ny-2);
+				staggeredPointsVY[j] = lastY + centerdy[j];
 			}
 			
 			//Update y of current row
-			lastY += data.centerdy[j];
+			lastY += centerdy[j];
 		}
 
 		lastX = (-1d)/(Nx-2);
 		for(int i = 0; i<Nx; i++){
-			data.centerdx[i] = 1d/(Nx-2);
-			data.centerPointsX[i] = lastX + 0.5d * data.centerdx[i];
+			centerdx[i] = 1d/(Nx-2);
+			centerPointsX[i] = lastX + 0.5d * centerdx[i];
 			
 			//Staggered grid:
 			if(i<Nx-1){
-				data.staggereddx[i] = 1d/(Nx-2);
-				data.staggeredPointsUX[i] = lastX + data.centerdx[i];
+				staggereddx[i] = 1d/(Nx-2);
+				staggeredPointsUX[i] = lastX + centerdx[i];
 			}
 			
 			//Update x of current column
-			lastX += data.centerdx[i];
+			lastX += centerdx[i];
 		}
+		
+		data.set_centerPointsX(centerPointsX);
+		data.set_centerPointsY(centerPointsY);
+		data.set_staggeredPointsUX(staggeredPointsUX);
+		data.set_staggeredPointsVY(staggeredPointsVY);
+		data.set_centerdx(centerdx);
+		data.set_centerdy(centerdy);
+		data.set_staggereddx(staggereddx);
+		data.set_staggereddy(staggereddy);
 		
 		System.out.println("(CFDMesher) Mesh generated.");
 		
